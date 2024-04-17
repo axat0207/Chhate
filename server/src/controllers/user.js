@@ -1,9 +1,10 @@
 import User from "../models/user.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { sendToken } from "../utils/features.js";
 
 export async function register(req, res) {
-  const { fullName, username, email, password } = req.body;
+  const { fullName, bio, username, email, password, avatar } = req.body;
 
   try {
     const userExist = await User.findOne({ $or: [{ username }, { email }] });
@@ -14,33 +15,30 @@ export async function register(req, res) {
 
     // Hash the password before saving it to database
     const hashedPassword = await bcrypt.hash(password, 10);
- 
-    
+
     const registereduser = await User.create({
       fullName,
+      bio,
       username,
       email,
-      password : hashedPassword,
+      password: hashedPassword,
+      avatar,
     });
 
     if (!registereduser) {
-        return res.status(500).json({ message: "Something Went wrong." });
-      }
-      const options = {
+      return res.status(500).json({ message: "Something Went wrong." });
+    }
+
+    if (req.cookies.accessToken) {
+      res.clearCookie("accessToken", {
+        maxAge: 15 * 1000 * 60 * 60 * 24,
+        sameSite: "none",
         httpOnly: true,
         secure: true,
-      };
-      if (req.cookies.accessToken) {
-        res.clearCookie("accessToken", options);
-        res.clearCookie("refreshToken", options);
-      }
-   
-
-    res.status(201).json({
-      status: "success",
-      message: "User has been created",
-      data: registereduser,
-    });
+      });
+    }
+    const userForToken = await User.findOne({ $or: [{ username }, { email }] });
+    sendToken(res, userForToken, 201, "User Created Sucessfully");
   } catch (error) {
     return res.status(500).json({
       status: "fail",
@@ -50,51 +48,56 @@ export async function register(req, res) {
 }
 
 export async function login(req, res) {
-  const { email, password } = req.body;
+  const { username, email, password } = req.body;
   try {
-    const UserExist = await User.findOne({ email });
+    const UserExist = await User.findOne({ $or: [{ email }, { username }] });
     if (!UserExist) {
       res.status(400).json({
         status: "error",
-        message: `Email ${email} does not exist
+        message: `Email or username does not exist
               Please sign up`,
       });
     }
     const isValidPassword = await bcrypt.compare(password, UserExist.password);
-  
+
     if (!isValidPassword) {
       return res.status(400).json({
         status: "error",
         message: `Invalid Password`,
       });
     }
-  
-    const accessToken = jwt.sign(
-      {
-        email: UserExist.email,
-        id: UserExist._id,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "10d" }
-    );
-  
-    const options = {
-      httpOnly: true,
-      secure: true,
-    };
-  
-    res.cookie("accessToken", accessToken, options);
-    
-  
-  
-    res.status(200).json({
-      status: "succes",
-      token: accessToken,
-    });
-  
+    console.log("ffrom login", UserExist)
+
+    sendToken(res, UserExist, 200, "Logged In sucessfully");
   } catch (error) {
     res.status(500).json({
       status: "Server error",
       message: `${error.message}`,
-      })
-  }}
+    });
+  }
+}
+
+export async function logout(req, res) {
+  try {
+    await res.clearCookie("accessToken", {
+      maxAge: 15 * 1000 * 60 * 60 * 24,
+      sameSite: "none",
+      httpOnly: true,
+      secure: true,
+    });
+
+    res.status(200).send("logged out");
+  } catch (error) {
+    throw new error.message
+  }
+}
+
+export async function getUser(req,res){
+  try {
+    console.log(req.user)
+    const user = await User.findById(req.user);
+    res.status(200).json({ user });
+  } catch (error) {
+    res.status(500).json(error.message)
+  }
+}
