@@ -6,7 +6,6 @@ const cookieOptions = {
   secure: true,
 };
 export const sendToken = (res, user, code, message) => {
-  
   const token = jwt.sign(
     {
       _id: user._id,
@@ -20,6 +19,14 @@ export const sendToken = (res, user, code, message) => {
     sucess: true,
     message,
     user,
-    token
+    token,
   });
 };
+export const emitEvent = async(req, event, users, data)=>{
+
+console.log("emmiting event ", event )
+}
+
+export function deletFilesFromCloudinary(public_ids){
+  console.log(public_ids);
+}

@@ -66,7 +66,7 @@ export async function login(req, res) {
         message: `Invalid Password`,
       });
     }
-    console.log("ffrom login", UserExist)
+   
 
     sendToken(res, UserExist, 200, "Logged In sucessfully");
   } catch (error) {
@@ -94,7 +94,7 @@ export async function logout(req, res) {
 
 export async function getUser(req,res){
   try {
-    console.log(req.user)
+
     const user = await User.findById(req.user);
     res.status(200).json({ user });
   } catch (error) {

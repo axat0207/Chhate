@@ -20,11 +20,11 @@ const messageSchema = new Schema(
     attachments: {
       public_id: {
         type: String,
-        required: true,
+        // required: true,
       },
       url: {
         type: String,
-        required: true,
+        // required: true,
       },
     },
   },
