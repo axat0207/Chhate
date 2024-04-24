@@ -3,6 +3,16 @@ import Chat from "../models/chat.js";
 import Message from "../models/message.js";
 import jwt from "jsonwebtoken";
 import { cookieOptions } from "../utils/features.js";
+
+export const getAdminData =  async (req, res) => {
+    try{
+        res.status(200).json({ admin : true});
+
+    }
+    catch(err){
+        return res.status(500).send(err.message);
+    }
+}
 export const adminLogin = async (req, res) => {
   try {
     const { secretKey } = req.body;
