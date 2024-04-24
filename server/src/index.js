@@ -3,6 +3,12 @@ import connectMongoDB from "./db.js";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { createFakeUser } from "./seeders/seed.js";
+import {
+  createGroupChats,
+  createMessagesInAChat,
+  createSingleChats,
+} from "./seeders/chat.js";
 // import {createGroupChats,createMessages, createMessagesInAChat, createSingleChats} from './seeders/chat.js'
 dotenv.config();
 
@@ -32,10 +38,12 @@ app.get("/", (req, res) => {
 });
 import user from "./routes/user.js";
 app.use("/api/v1/user", user);
-
-import chat from "./routes/chat.js"
-import { createFakeUser } from "./seeders/seed.js";
-import { createGroupChats, createMessagesInAChat, createSingleChats } from "./seeders/chat.js";
+//caht
+import chat from "./routes/chat.js";
 app.use("/api/v1/chat", chat);
+
+//admin
+import admin from "./routes/admin.js";
+app.use("/api/v1/admin", admin);
 
 app.listen(PORT, () => [console.log(`Server running on port ${PORT}`)]);

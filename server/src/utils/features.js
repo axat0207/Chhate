@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-const cookieOptions = {
+export const cookieOptions = {
   maxAge: 15 * 1000 * 60 * 60 * 24,
   sameSite: "none",
   httpOnly: true,
